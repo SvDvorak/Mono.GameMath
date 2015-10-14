@@ -1,857 +1,1281 @@
-// 
-// Vector4.cs
-//  
-// Author:
-//       Michael Hutchinson <mhutchinson@novell.com>
-// 
-// Copyright (c) 2010 Novell, Inc.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-using System;
-using System.Runtime.InteropServices;
+// MIT License - Copyright (C) The Mono.Xna Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
-#if SIMD
-using Mono.Simd;
-#endif
+using System;
+using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Mono.GameMath
 {
-	[Serializable]
-	public struct Vector4 : IEquatable<Vector4>
-	{
-#if SIMD
-		internal Vector4f v4;
-		public float X { get { return v4.X; } set { v4.X = value; } }
-		public float Y { get { return v4.Y; } set { v4.Y = value; } }
-		public float Z { get { return v4.Z; } set { v4.Z = value; } }
-		public float W { get { return v4.W; } set { v4.W = value; } }
-		Vector4 (Vector4f v4) { this.v4 = v4; }
-#else
-		float x, y, z, w;
-		public float X { get { return x; } set { x = value; } }
-		public float Y { get { return y; } set { y = value; } }
-		public float Z { get { return z; } set { z = value; } }
-		public float W { get { return w; } set { w = value; } }
+    /// <summary>
+    /// Describes a 4D-vector.
+    /// </summary>
+#if WINDOWS
+    [System.ComponentModel.TypeConverter(typeof(Microsoft.Xna.Framework.Design.Vector4TypeConverter))]
 #endif
-		
-		#region Constructors
-		
-		public Vector4 (float value)
-#if SIMD
-		{
-			v4 = new Vector4f (value);
-		}
-#else
-		: this (value, value, value, value)
-		{
-		}
-#endif
-		
-		public Vector4 (Vector2 value, float z, float w) : this (value.X, value.Y, z, w)
-		{
-		}
-		
-		public Vector4 (Vector3 value, float z, float w) : this (value.X, value.Y, value.Z, w)
-		{
-		}
-		
-		public Vector4 (float x, float y, float z, float w)
-		{
-#if SIMD
-			v4 = new Vector4f (x, y, z, w);
-#else
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.w = w;
-#endif
-		}
-		
-		#endregion
-		
-		#region Static properties
-		
-		public static Vector4 UnitX {
-			get { return new Vector4 (1f, 0f, 0f, 0f); }
-		}
-		
-		public static Vector4 UnitY {
-			get { return new Vector4 (0f, 1f, 0f, 0f); }
-		}
-		
-		public static Vector4 UnitZ {
-			get { return new Vector4 (0f, 0f, 1f, 0f); }
-		}
-		
-		public static Vector4 UnitW {
-			get { return new Vector4 (0f, 0f, 0f, 1f); }
-		}
-		
-		public static Vector4 One {
-			get { return new Vector4 (1f); }
-		}
-		
-		public static Vector4 Zero {
-			get { return new Vector4 (0f); }
-		}
-		
-		#endregion
-		
-		#region Arithmetic
-		
-		public static Vector4 Add (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 + value2.v4);
-#else
-			return new Vector4 (value1.x + value2.x, value1.y + value2.y, value1.z + value2.z, value1.w + value2.w);
-#endif
-		}
-		
-		public static void Add (ref Vector4 value1, ref Vector4 value2, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value1.v4 + value2.v4;
-#else
-			result.x = value1.x + value2.x;
-			result.y = value1.y + value2.y;
-			result.z = value1.z + value2.z;
-			result.w = value1.w + value2.w;
-#endif
-		}
-		
-		public static Vector4 Divide (Vector4 value1, float value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 / new Vector4f (value2));
-#else
-			return new Vector4 (value1.x / value2, value1.y / value2, value1.z / value2, value1.w / value2);
-#endif
-		}
-		
-		public static void Divide (ref Vector4 value1, float divider, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value1.v4 / new Vector4f (divider);
-#else
-			result.x = value1.x / divider;
-			result.y = value1.y / divider;
-			result.z = value1.z / divider;
-			result.w = value1.w / divider;
-#endif
-		}
-		
-		public static Vector4 Divide (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 / value2.v4);
-#else
-			return new Vector4 (value1.x / value2.x, value1.y / value2.y, value1.z / value2.z, value1.w / value2.w);
-#endif
-		}
-		
-		public static void Divide (ref Vector4 value1, ref Vector4 value2, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value1.v4 / value2.v4;
-#else
-			result.x = value1.x / value2.x;
-			result.y = value1.y / value2.y;
-			result.z = value1.z / value2.z;
-			result.w = value1.w / value2.w;
-#endif
-		}
-		
-		public static Vector4 Multiply (Vector4 value1, float scaleFactor)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 * new Vector4f (scaleFactor));
-#else
-			return new Vector4 (value1.x * scaleFactor, value1.y * scaleFactor, value1.z * scaleFactor, value1.w * scaleFactor);
-#endif
-		}
-		
-		public static void Multiply (ref Vector4 value1, float scaleFactor, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value1.v4 * new Vector4f (scaleFactor);
-#else
-			result.x = value1.x * scaleFactor;
-			result.y = value1.y * scaleFactor;
-			result.z = value1.z * scaleFactor;
-			result.w = value1.w * scaleFactor;
-#endif
-		}
-		
-		public static Vector4 Multiply (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 * value2.v4);	
-#else
-			return new Vector4 (value1.x * value2.x, value1.y * value2.y, value1.z * value2.z, value1.w * value2.w);
-#endif
-		}
-		
-		public static void Multiply (ref Vector4 value1, ref Vector4 value2, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value1.v4 * value2.v4;
-#else
-			result.x = value1.x * value2.x;
-			result.y = value1.y * value2.y;
-			result.z = value1.z * value2.z;
-			result.w = value1.w * value2.w;
-#endif
-		}
-		
-		public static Vector4 Negate (Vector4 value)
-		{
-#if SIMD
-			return new Vector4 (value.v4 ^ new Vector4f (-0.0f));
-#else
-			return new Vector4 (- value.x, - value.y, - value.z, - value.w);
-#endif
-		}
-		
-		public static void Negate (ref Vector4 value, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value.v4 ^ new Vector4f (-0.0f);
-#else
-			result.x = - value.x;
-			result.y = - value.y;
-			result.z = - value.z;
-			result.w = - value.w;
-#endif
-		}
-		
-		public static Vector4 Subtract (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 - value2.v4);
-#else
-			return new Vector4 (value1.x - value2.x, value1.y - value2.y, value1.z - value2.z, value1.w - value2.w);
-#endif
-		}
-		
-		public static void Subtract (ref Vector4 value1, ref Vector4 value2, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value1.v4 - value2.v4;
-#else
-			result.x = value1.x - value2.x;
-			result.y = value1.y - value2.y;
-			result.z = value1.z - value2.z;
-			result.w = value1.w - value2.w;
-#endif
-		}
-		
-		#endregion
-		
-		#region Operator overloads
-		
-		public static Vector4 operator + (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 + value2.v4);
-#else
-			return Add (value1, value2);
-#endif
-		}
-		
-		public static Vector4 operator / (Vector4 value, float divider)
-		{
-#if SIMD
-			return new Vector4 (value.v4 / new Vector4f (divider));
-#else
-			return Divide (value, divider);
-#endif
-		}
-		
-		public static Vector4 operator / (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 / value2.v4);
-#else
-			return Divide (value1, value2);
-#endif
-		}
-		
-		public static Vector4 operator * (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 * value2.v4);
-#else
-			return Multiply (value1, value2);
-#endif
-		}
-		
-		public static Vector4 operator * (Vector4 value1, float scaleFactor)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 * scaleFactor);
-#else
-			return Multiply (value1, scaleFactor);
-#endif
-		}
-		
-		public static Vector4 operator * (float scaleFactor, Vector4 value1)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 * scaleFactor);
-#else
-			return Multiply (value1, scaleFactor);
-#endif
-		}
-		
-		public static Vector4 operator - (Vector4 value1, Vector4 value2)
-		{
-#if SIMD
-			return new Vector4 (value1.v4 - value2.v4);
-#else
-			return Subtract (value1, value2);
-#endif
-		}
-		
-		public static Vector4 operator - (Vector4 value)
-		{
-#if SIMD
-			return new Vector4 (value.v4 ^ new Vector4f (-0.0f));
-#else
-			return Negate (value);
-#endif
-		}
-		
-		#endregion
-		
-		#region Interpolation
-		
-		public static Vector4 CatmullRom (Vector4 value1, Vector4 value2, Vector4 value3, Vector4 value4, float amount)
-		{
-			CatmullRom (ref value1, ref value2, ref value3, ref value4, amount, out value1);
-			return value1;
-		}
-		
-		public static void CatmullRom (ref Vector4 value1, ref Vector4 value2, ref Vector4 value3, ref Vector4 value4,
-			float amount, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = new Vector4f (
-				MathHelper.CatmullRom (value1.X, value2.X, value3.X, value4.X, amount),
-				MathHelper.CatmullRom (value1.Y, value2.Y, value3.Y, value4.Y, amount),
-				MathHelper.CatmullRom (value1.Z, value2.Z, value3.Z, value4.Z, amount),
-				MathHelper.CatmullRom (value1.W, value2.W, value3.W, value4.W, amount));
-#else
-			result.x = MathHelper.CatmullRom (value1.x, value2.x, value3.x, value4.x, amount);
-			result.y = MathHelper.CatmullRom (value1.y, value2.y, value3.y, value4.y, amount);
-			result.z = MathHelper.CatmullRom (value1.z, value2.z, value3.z, value4.z, amount);
-			result.w = MathHelper.CatmullRom (value1.w, value2.w, value3.w, value4.w, amount);
-#endif
-		}
-		
-		public static Vector4 Hermite (Vector4 value1, Vector4 tangent1, Vector4 value2, Vector4 tangent2, float amount)
-		{
-			Hermite (ref value1, ref tangent1, ref value2, ref tangent2, amount, out value1);
-			return value1;
-		}
-		
-		public static void Hermite (ref Vector4 value1, ref Vector4 tangent1, ref Vector4 value2, ref Vector4 tangent2,
-			float amount, out Vector4 result)
-		{
-#if SIMD
-			var s = new Vector4f (amount);
-			var s2 = s * s;
-			var s3 = s2 * s;
-			var c1 = new Vector4f (1f);
-			var c2 = new Vector4f (2f);
-			var m2 = new Vector4f (-2f);
-			var c3 = new Vector4f (3f);
-			
-			var h1 = c2 * s3 - c3 * s2 + c1;
-			var h2 = m2 * s3 + c3 * s2;
-			var h3 = s3 - 2 * s2 + s;
-			var h4 = s3 - s2;
-			
-			result.v4 = h1 * value1.v4 + h2 * value2.v4 + h3 * tangent1.v4 + h4 * tangent2.v4;
-#else
-			float s = amount;
-			float s2 = s * s;
-			float s3 = s2 * s;
-			
-			float h1 =  2 * s3 - 3 * s2 + 1;
-			float h2 = -2 * s3 + 3 * s2    ;
-			float h3 =      s3 - 2 * s2 + s;
-			float h4 =      s3 -     s2    ;
-			
-			result.x = h1 * value1.x + h2 * value2.x + h3 * tangent1.x + h4 * tangent2.x;
-			result.y = h1 * value1.y + h2 * value2.y + h3 * tangent1.y + h4 * tangent2.y;
-			result.z = h1 * value1.z + h2 * value2.z + h3 * tangent1.z + h4 * tangent2.z;
-			result.w = h1 * value1.w + h2 * value2.w + h3 * tangent1.w + h4 * tangent2.w;
-#endif
-		}
-		
-		public static Vector4 Lerp (Vector4 value1, Vector4 value2, float amount)
-		{
-			Lerp (ref value1, ref value2, amount, out value1);
-			return value1;
-		}
-		
-		public static void Lerp (ref Vector4 value1, ref Vector4 value2, float amount, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = value1.v4 + (value2.v4 - value1.v4) * amount; 
-#else
-			result.x = value1.x + (value2.x - value1.x) * amount;
-			result.y = value1.y + (value2.y - value1.y) * amount;
-			result.z = value1.z + (value2.z - value1.z) * amount;
-			result.w = value1.w + (value2.w - value1.w) * amount;
-#endif
-		}
-		
-		public static Vector4 SmoothStep (Vector4 value1, Vector4 value2, float amount)
-		{
-			SmoothStep (ref value1, ref value2, amount, out value1);
-			return value1;
-		}
-		
-		public static void SmoothStep (ref Vector4 value1, ref Vector4 value2, float amount, out Vector4 result)
-		{
-			float scale = (amount * amount * (3 - 2 * amount));
-#if SIMD
-			result.v4 = value1.v4 + (value2.v4 - value1.v4) * scale; 
-#else
-			result.x = value1.x + (value2.x - value1.x) * scale;
-			result.y = value1.y + (value2.y - value1.y) * scale;
-			result.z = value1.z + (value2.z - value1.z) * scale;
-			result.w = value1.w + (value2.w - value1.w) * scale;
-#endif
-		}
-		
-		#endregion
-		
-		#region Other maths
-		
-		public static Vector4 Barycentric (Vector4 value1, Vector4 value2, Vector4 value3, float amount1, float amount2)
-		{
-			Barycentric (ref value1, ref value2, ref value3, amount1, amount2, out value1);
-			return value1;
-		}
-		
-		public static void Barycentric (ref Vector4 value1, ref Vector4 value2, ref Vector4 value3, float amount1,
-			float amount2, out Vector4 result)
-		{
-#if SIMD
-			result = new Vector4 (
-				MathHelper.Barycentric (value1.X, value2.X, value3.X, amount1, amount2),
-				MathHelper.Barycentric (value1.Y, value2.Y, value3.Y, amount1, amount2),
-				MathHelper.Barycentric (value1.Z, value2.Z, value3.Z, amount1, amount2),
-				MathHelper.Barycentric (value1.W, value2.W, value3.Z, amount1, amount2));
-#else
-			result.x = MathHelper.Barycentric (value1.x, value2.x, value3.x, amount1, amount2);
-			result.y = MathHelper.Barycentric (value1.y, value2.y, value3.y, amount1, amount2);
-			result.z = MathHelper.Barycentric (value1.z, value2.z, value3.z, amount1, amount2);
-			result.w = MathHelper.Barycentric (value1.w, value2.w, value3.w, amount1, amount2);
-#endif
-		}
-		
-		public static Vector4 Clamp (Vector4 value1, Vector4 min, Vector4 max)
-		{
-			Clamp (ref value1, ref min, ref max, out value1);
-			return value1;
-		}
-		
-		public static void Clamp (ref Vector4 value1, ref Vector4 min, ref Vector4 max, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = VectorOperations.Min (VectorOperations.Max (value1.v4, min.v4), max.v4);
-#else
-			result.x = MathHelper.Clamp (value1.x, min.x, max.x);
-			result.y = MathHelper.Clamp (value1.y, min.y, max.y);
-			result.z = MathHelper.Clamp (value1.z, min.z, max.z);
-			result.w = MathHelper.Clamp (value1.w, min.w, max.w);
-#endif
-		}
-		
-		public static float Distance (Vector4 value1, Vector4 value2)
-		{
-			float result;
-			Distance (ref value1, ref value2, out result);
-			return result;
-		}
-		
-		public static void Distance (ref Vector4 value1, ref Vector4 value2, out float result)
-		{
-#if SIMD
-			Vector4f r0 = value2.v4 - value1.v4;
-			r0 = r0 * r0;
-			r0 = r0 + r0.Shuffle (ShuffleSel.Swap);
-			r0 = r0 + r0.Shuffle (ShuffleSel.RotateLeft);
-			result = r0.Sqrt ().X;
-#else
-			DistanceSquared (ref value1, ref value2, out result);
-			result = (float) System.Math.Sqrt (result);
-#endif
-		}
-		
-		public static float DistanceSquared (Vector4 value1, Vector4 value2)
-		{
-			float result;
-			DistanceSquared (ref value1, ref value2, out result);
-			return result;
-		}
-		
-		public static void DistanceSquared (ref Vector4 value1, ref Vector4 value2, out float result)
-		{
-#if SIMD
-			Vector4f r0 = value2.v4 - value1.v4;
-			r0 = r0 * r0;
-			r0 = r0 + r0.Shuffle (ShuffleSel.Swap);
-			r0 = r0 + r0.Shuffle (ShuffleSel.RotateLeft);
-			result = r0.X;
-#else
-			Subtract (ref value1, ref value2, out value1);
-			result = value1.LengthSquared ();
-#endif
-		}
-		
-		public static float Dot (Vector4 vector1, Vector4 vector2)
-		{
-			float result;
-			Dot (ref vector1, ref vector2, out result);
-			return result;
-		}
-		
-		public static void Dot (ref Vector4 vector1, ref Vector4 vector2, out float result)
-		{
-#if SIMD
-			//NOTE: shuffle->add->shuffle->add is faster than horizontal-add->horizontal-add
-			Vector4f r0 = vector2.v4 * vector1.v4;
-			// r0 = xX yY zZ wW
-			Vector4f r1 = r0.Shuffle (ShuffleSel.Swap);
-			//r1 = zZ wW xX yY
-			r0 = r0 + r1;
-			//r0 = xX+zZ yY+wW xX+zZ yY+wW
-			r1 = r0.Shuffle (ShuffleSel.RotateLeft);
-			//r1 = yY+wW xX+zZ yY+wW xX+zZ
-			r0 = r0 + r1;
-			//r0 = xX+yY+zZ+wW xX+yY+zZ+wW xX+yY+zZ+wW xX+yY+zZ+wW
-			result = r0.Sqrt ().X;
-#else
-			result = (vector1.x * vector2.x) + (vector1.y * vector2.y) + (vector1.z * vector2.z) + (vector1.w * vector2.w);
-#endif
-		}
-		
-		public float Length ()
-		{
-#if SIMD
-			Vector4f r0 = v4;
-			r0 = r0 * r0;
-			r0 = r0 + r0.Shuffle (ShuffleSel.Swap);
-			r0 = r0 + r0.Shuffle (ShuffleSel.RotateLeft);
-			return r0.Sqrt ().X;
-#else
-			return (float) System.Math.Sqrt (LengthSquared ());
-#endif	
-		}
-		
-		public float LengthSquared ()
-		{
-#if SIMD
-			Vector4f r0 = v4;
-			r0 = r0 * r0;
-			r0 = r0 + r0.Shuffle (ShuffleSel.Swap);
-			r0 = r0 + r0.Shuffle (ShuffleSel.RotateLeft);
-			return r0.X;
-#else
-			return (x * x) + (y * y) + (z * z) + (w * w);
-#endif	
-		}
-		
-		public static Vector4 Max (Vector4 value1, Vector4 value2)
-		{
-			Max (ref value1, ref value2, out value1);
-			return value1;
-		}
-		
-		public static void Max (ref Vector4 value1, ref Vector4 value2, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = VectorOperations.Max (value1.v4, value2.v4);
-#else
-			result.x = System.Math.Max (value1.x, value2.x);
-			result.y = System.Math.Max (value1.y, value2.y);
-			result.z = System.Math.Max (value1.z, value2.z);
-			result.w = System.Math.Max (value1.w, value2.w);
-#endif
-		}
-		
-		public static Vector4 Min (Vector4 value1, Vector4 value2)
-		{
-			Min (ref value1, ref value2, out value1);
-			return value1;
-		}
-		
-		public static void Min (ref Vector4 value1, ref Vector4 value2, out Vector4 result)
-		{
-#if SIMD
-			result.v4 = VectorOperations.Min (value1.v4, value2.v4);
-#else
-			result.x = System.Math.Min (value1.x, value2.x);
-			result.y = System.Math.Min (value1.y, value2.y);
-			result.z = System.Math.Min (value1.z, value2.z);
-			result.w = System.Math.Min (value1.w, value2.w);
-#endif
-		}
-		
-		public void Normalize ()
-		{
-			Normalize (ref this, out this);
-		}
-		
-		public static Vector4 Normalize (Vector4 value)
-		{
-			value.Normalize ();
-			return value;
-		}
-		
-		public static void Normalize (ref Vector4 value, out Vector4 result)
-		{
-#if SIMD
-			Vector4f r0 = value.v4;
-			r0 = r0 * r0;
-			r0 = r0 + r0.Shuffle (ShuffleSel.Swap);
-			r0 = r0 + r0.Shuffle (ShuffleSel.RotateLeft);
-			result.v4 = value.v4 / r0.Sqrt ();
-#else
-			var l = value.Length ();
-			result.x = value.x / l;
-			result.y = value.y / l;
-			result.z = value.z / l;
-			result.w = value.w / l;
-#endif
-		}
-		
-		#endregion
-		
-		#region Transform
-		
-		public static Vector4 Transform (Vector2 position, Matrix matrix)
-		{
-			Vector4 result;
-			Transform (ref position, ref matrix, out result);
-			return result;
-		}
-		
-		public static void Transform (ref Vector2 position, ref Matrix matrix, out Vector4 result)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		public static Vector4 Transform (Vector2 value, Quaternion rotation)
-		{
-			Vector4 result;
-			Transform (ref value, ref rotation, out result);
-			return result;
-		}
-		
-		public static void Transform (ref Vector2 value, ref Quaternion rotation, out Vector4 result)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		public static Vector4 Transform (Vector3 position, Matrix matrix)
-		{
-			Vector4 result;
-			Transform (ref position, ref matrix, out result);
-			return result;
-		}
-		
-		public static void Transform (ref Vector3 position, ref Matrix matrix, out Vector4 result)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		public static Vector4 Transform (Vector3 value, Quaternion rotation)
-		{
-			Vector4 result;
-			Transform (ref value, ref rotation, out result);
-			return result;
-		}
-		
-		public static void Transform (ref Vector3 value, ref Quaternion rotation, out Vector4 result)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		public static Vector4 Transform (Vector4 position, Matrix matrix)
-		{
-			Vector4 result;
-			Transform (ref position, ref matrix, out result);
-			return result;
-		}
-		
-		public static void Transform (ref Vector4 position, ref Matrix matrix, out Vector4 result)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		public static Vector4 Transform (Vector4 value, Quaternion rotation)
-		{
-			Vector4 result;
-			Transform (ref value, ref rotation, out result);
-			return result;
-		}
-		
-		public static void Transform (ref Vector4 value, ref Quaternion rotation, out Vector4 result)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		static void CheckArrayArgs (Vector4[] sourceArray, int sourceIndex, Vector4[] destinationArray,
-			int destinationIndex, int length)
-		{
-			if (sourceArray == null)
-				throw new ArgumentNullException ("sourceArray");
-			if (destinationArray == null)
-				throw new ArgumentNullException ("destinationArray");
-			if (sourceIndex + length > sourceArray.Length)
-				throw new ArgumentException ("Source is smaller than specified length and index");
-			if (destinationIndex + length > destinationArray.Length)
-				throw new ArgumentException ("Destination is smaller than specified length and index");
-		}
-		
-		static void CheckArrayArgs (Vector4[] sourceArray, Vector4[] destinationArray)
-		{
-			if (sourceArray == null)
-				throw new ArgumentNullException ("sourceArray");
-			if (destinationArray == null)
-				throw new ArgumentNullException ("destinationArray");
-			if (destinationArray.Length < sourceArray.Length)
-				throw new ArgumentException ("Destination is smaller than source", "destinationArray");
-		}
-		
-		public static void Transform (Vector4[] sourceArray, int sourceIndex, ref Matrix matrix,
-			Vector4[] destinationArray, int destinationIndex, int length)
-		{
-			CheckArrayArgs (sourceArray, sourceIndex, destinationArray, destinationIndex, length);
-			
-			int smax = sourceIndex + length;
-			for (int s = sourceIndex, d = destinationIndex; s < smax; s++, d++)
-				Transform (ref sourceArray[s], ref matrix, out destinationArray[d]);
-		}
-		
-		public static void Transform (Vector4[] sourceArray, int sourceIndex, ref Quaternion rotation,
-			Vector4[] destinationArray, int destinationIndex, int length)
-		{
-			CheckArrayArgs (sourceArray, sourceIndex, destinationArray, destinationIndex, length);
-			
-			int smax = sourceIndex + length;
-			for (int s = sourceIndex, d = destinationIndex; s < smax; s++, d++)
-				Transform (ref sourceArray[s], ref rotation, out destinationArray[d]);
-		}
-		
-		public static void Transform (Vector4[] sourceArray, ref Matrix matrix, Vector4[] destinationArray)
-		{
-			CheckArrayArgs (sourceArray, destinationArray);
-			
-			for (int i = 0; i < sourceArray.Length; i++)
-				Transform (ref sourceArray[i], ref matrix, out destinationArray[i]);
-		}
-		
-		public static void Transform (Vector4[] sourceArray, ref Quaternion rotation, Vector4[] destinationArray)
-		{
-			CheckArrayArgs (sourceArray, destinationArray);
-			
-			for (int i = 0; i < sourceArray.Length; i++)
-				Transform (ref sourceArray[i], ref rotation, out destinationArray[i]);
-		}
-		
-		#endregion
-		
-		#region Equality
-		
-		public bool Equals (Vector4 other)
-		{
-#if SIMD
-			return v4 == other.v4;
-#else
-			return x == other.x && y == other.y && z == other.z && w == other.w;
-#endif
-		}
-		
-		public override bool Equals (object obj)
-		{
-			return obj is Vector4 && ((Vector4)obj) == this;
-		}
-		
-		public override int GetHashCode ()
-		{
-#if SIMD
-			unsafe {
-				Vector4f f = v4;
-				Vector4i i = *((Vector4i*)&f);
-				i = i ^ i.Shuffle (ShuffleSel.Swap);
-				i = i ^ i.Shuffle (ShuffleSel.RotateLeft);
-				return i.X;
-			}
-#elif UNSAFE
-			unsafe {
-				float f = x;
-				int acc = *((int*)&f);
-				f = y;
-				acc ^= *((int*)&f);
-				f = z;
-				acc ^= *((int*)&f);
-				f = w;
-				acc ^= *((int*)&f);
-				return acc;
-			}
-			
-#else
-			return x.GetHashCode () ^ y.GetHashCode () ^ w.GetHashCode () ^ w.GetHashCode ();
-#endif
-		}
-		
-		public static bool operator == (Vector4 a, Vector4 b)
-		{
-#if SIMD
-			return a.v4 == b.v4;
-#else
-			return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
-#endif
-		}
-		
-		public static bool operator != (Vector4 a, Vector4 b)
-		{
-#if SIMD
-			return a.v4 != b.v4;
-#else
-			return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w;
-#endif
-		}
-		
-		# endregion
-		
-		public override string ToString ()
-		{
-			return string.Format ("{{X:{0} Y:{1} Z:{2} W:{3}}}", X, Y, Z, W);
-		}
-	}
-}
+    [DataContract]
+    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    public struct Vector4 : IEquatable<Vector4>
+    {
+        #region Private Fields
 
+        private static readonly Vector4 zero = new Vector4();
+        private static readonly Vector4 one = new Vector4(1f, 1f, 1f, 1f);
+        private static readonly Vector4 unitX = new Vector4(1f, 0f, 0f, 0f);
+        private static readonly Vector4 unitY = new Vector4(0f, 1f, 0f, 0f);
+        private static readonly Vector4 unitZ = new Vector4(0f, 0f, 1f, 0f);
+        private static readonly Vector4 unitW = new Vector4(0f, 0f, 0f, 1f);
+
+        #endregion
+
+        #region Public Fields
+
+        /// <summary>
+        /// The x coordinate of this <see cref="Vector4"/>.
+        /// </summary>
+        [DataMember]
+        public float X;
+
+        /// <summary>
+        /// The y coordinate of this <see cref="Vector4"/>.
+        /// </summary>
+        [DataMember]
+        public float Y;
+
+        /// <summary>
+        /// The z coordinate of this <see cref="Vector4"/>.
+        /// </summary>
+        [DataMember]
+        public float Z;
+
+        /// <summary>
+        /// The w coordinate of this <see cref="Vector4"/>.
+        /// </summary>
+        [DataMember]
+        public float W;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 0.
+        /// </summary>
+        public static Vector4 Zero
+        {
+            get { return zero; }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with components 1, 1, 1, 1.
+        /// </summary>
+        public static Vector4 One
+        {
+            get { return one; }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with components 1, 0, 0, 0.
+        /// </summary>
+        public static Vector4 UnitX
+        {
+            get { return unitX; }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with components 0, 1, 0, 0.
+        /// </summary>
+        public static Vector4 UnitY
+        {
+            get { return unitY; }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with components 0, 0, 1, 0.
+        /// </summary>
+        public static Vector4 UnitZ
+        {
+            get { return unitZ; }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 1.
+        /// </summary>
+        public static Vector4 UnitW
+        {
+            get { return unitW; }
+        }
+
+        #endregion
+
+        #region Internal Properties
+
+        internal string DebugDisplayString
+        {
+            get
+            {
+                return string.Concat(
+                    this.X.ToString(), "  ",
+                    this.Y.ToString(), "  ",
+                    this.Z.ToString(), "  ",
+                    this.W.ToString()
+                );
+            }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Constructs a 3d vector with X, Y, Z and W from four values.
+        /// </summary>
+        /// <param name="x">The x coordinate in 4d-space.</param>
+        /// <param name="y">The y coordinate in 4d-space.</param>
+        /// <param name="z">The z coordinate in 4d-space.</param>
+        /// <param name="w">The w coordinate in 4d-space.</param>
+        public Vector4(float x, float y, float z, float w)
+        {
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
+            this.W = w;
+        }
+
+        /// <summary>
+        /// Constructs a 3d vector with X and Z from <see cref="Vector2"/> and Z and W from the scalars.
+        /// </summary>
+        /// <param name="value">The x and y coordinates in 4d-space.</param>
+        /// <param name="z">The z coordinate in 4d-space.</param>
+        /// <param name="w">The w coordinate in 4d-space.</param>
+        public Vector4(Vector2 value, float z, float w)
+        {
+            this.X = value.X;
+            this.Y = value.Y;
+            this.Z = z;
+            this.W = w;
+        }
+
+        /// <summary>
+        /// Constructs a 3d vector with X, Y, Z from <see cref="Vector3"/> and W from a scalar.
+        /// </summary>
+        /// <param name="value">The x, y and z coordinates in 4d-space.</param>
+        /// <param name="w">The w coordinate in 4d-space.</param>
+        public Vector4(Vector3 value, float w)
+        {
+            this.X = value.X;
+            this.Y = value.Y;
+            this.Z = value.Z;
+            this.W = w;
+        }
+
+        /// <summary>
+        /// Constructs a 4d vector with X, Y, Z and W set to the same value.
+        /// </summary>
+        /// <param name="value">The x, y, z and w coordinates in 4d-space.</param>
+        public Vector4(float value)
+        {
+            this.X = value;
+            this.Y = value;
+            this.Z = value;
+            this.W = value;
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Performs vector addition on <paramref name="value1"/> and <paramref name="value2"/>.
+        /// </summary>
+        /// <param name="value1">The first vector to add.</param>
+        /// <param name="value2">The second vector to add.</param>
+        /// <returns>The result of the vector addition.</returns>
+        public static Vector4 Add(Vector4 value1, Vector4 value2)
+        {
+            value1.X += value2.X;
+            value1.Y += value2.Y;
+            value1.Z += value2.Z;
+            value1.W += value2.W;
+            return value1;
+        }
+
+        /// <summary>
+        /// Performs vector addition on <paramref name="value1"/> and
+        /// <paramref name="value2"/>, storing the result of the
+        /// addition in <paramref name="result"/>.
+        /// </summary>
+        /// <param name="value1">The first vector to add.</param>
+        /// <param name="value2">The second vector to add.</param>
+        /// <param name="result">The result of the vector addition.</param>
+        public static void Add(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result.X = value1.X + value2.X;
+            result.Y = value1.Y + value2.Y;
+            result.Z = value1.Z + value2.Z;
+            result.W = value1.W + value2.W;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 4d-triangle.
+        /// </summary>
+        /// <param name="value1">The first vector of 4d-triangle.</param>
+        /// <param name="value2">The second vector of 4d-triangle.</param>
+        /// <param name="value3">The third vector of 4d-triangle.</param>
+        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 4d-triangle.</param>
+        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 4d-triangle.</param>
+        /// <returns>The cartesian translation of barycentric coordinates.</returns>
+        public static Vector4 Barycentric(Vector4 value1, Vector4 value2, Vector4 value3, float amount1, float amount2)
+        {
+            return new Vector4(
+                MathHelper.Barycentric(value1.X, value2.X, value3.X, amount1, amount2),
+                MathHelper.Barycentric(value1.Y, value2.Y, value3.Y, amount1, amount2),
+                MathHelper.Barycentric(value1.Z, value2.Z, value3.Z, amount1, amount2),
+                MathHelper.Barycentric(value1.W, value2.W, value3.W, amount1, amount2));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 4d-triangle.
+        /// </summary>
+        /// <param name="value1">The first vector of 4d-triangle.</param>
+        /// <param name="value2">The second vector of 4d-triangle.</param>
+        /// <param name="value3">The third vector of 4d-triangle.</param>
+        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 4d-triangle.</param>
+        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 4d-triangle.</param>
+        /// <param name="result">The cartesian translation of barycentric coordinates as an output parameter.</param>
+        public static void Barycentric(ref Vector4 value1, ref Vector4 value2, ref Vector4 value3, float amount1, float amount2, out Vector4 result)
+        {
+            result.X = MathHelper.Barycentric(value1.X, value2.X, value3.X, amount1, amount2);
+            result.Y = MathHelper.Barycentric(value1.Y, value2.Y, value3.Y, amount1, amount2);
+            result.Z = MathHelper.Barycentric(value1.Z, value2.Z, value3.Z, amount1, amount2);
+            result.W = MathHelper.Barycentric(value1.W, value2.W, value3.W, amount1, amount2);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains CatmullRom interpolation of the specified vectors.
+        /// </summary>
+        /// <param name="value1">The first vector in interpolation.</param>
+        /// <param name="value2">The second vector in interpolation.</param>
+        /// <param name="value3">The third vector in interpolation.</param>
+        /// <param name="value4">The fourth vector in interpolation.</param>
+        /// <param name="amount">Weighting factor.</param>
+        /// <returns>The result of CatmullRom interpolation.</returns>
+        public static Vector4 CatmullRom(Vector4 value1, Vector4 value2, Vector4 value3, Vector4 value4, float amount)
+        {
+            return new Vector4(
+                MathHelper.CatmullRom(value1.X, value2.X, value3.X, value4.X, amount),
+                MathHelper.CatmullRom(value1.Y, value2.Y, value3.Y, value4.Y, amount),
+                MathHelper.CatmullRom(value1.Z, value2.Z, value3.Z, value4.Z, amount),
+                MathHelper.CatmullRom(value1.W, value2.W, value3.W, value4.W, amount));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains CatmullRom interpolation of the specified vectors.
+        /// </summary>
+        /// <param name="value1">The first vector in interpolation.</param>
+        /// <param name="value2">The second vector in interpolation.</param>
+        /// <param name="value3">The third vector in interpolation.</param>
+        /// <param name="value4">The fourth vector in interpolation.</param>
+        /// <param name="amount">Weighting factor.</param>
+        /// <param name="result">The result of CatmullRom interpolation as an output parameter.</param>
+        public static void CatmullRom(ref Vector4 value1, ref Vector4 value2, ref Vector4 value3, ref Vector4 value4, float amount, out Vector4 result)
+        {
+            result.X = MathHelper.CatmullRom(value1.X, value2.X, value3.X, value4.X, amount);
+            result.Y = MathHelper.CatmullRom(value1.Y, value2.Y, value3.Y, value4.Y, amount);
+            result.Z = MathHelper.CatmullRom(value1.Z, value2.Z, value3.Z, value4.Z, amount);
+            result.W = MathHelper.CatmullRom(value1.W, value2.W, value3.W, value4.W, amount);
+        }
+
+        /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value1">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <returns>The clamped value.</returns>
+        public static Vector4 Clamp(Vector4 value1, Vector4 min, Vector4 max)
+        {
+            return new Vector4(
+                MathHelper.Clamp(value1.X, min.X, max.X),
+                MathHelper.Clamp(value1.Y, min.Y, max.Y),
+                MathHelper.Clamp(value1.Z, min.Z, max.Z),
+                MathHelper.Clamp(value1.W, min.W, max.W));
+        }
+
+        /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value1">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="result">The clamped value as an output parameter.</param>
+        public static void Clamp(ref Vector4 value1, ref Vector4 min, ref Vector4 max, out Vector4 result)
+        {
+            result.X = MathHelper.Clamp(value1.X, min.X, max.X);
+            result.Y = MathHelper.Clamp(value1.Y, min.Y, max.Y);
+            result.Z = MathHelper.Clamp(value1.Z, min.Z, max.Z);
+            result.W = MathHelper.Clamp(value1.W, min.W, max.W);
+        }
+
+        /// <summary>
+        /// Returns the distance between two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <returns>The distance between two vectors.</returns>
+        public static float Distance(Vector4 value1, Vector4 value2)
+        {
+            return (float)Math.Sqrt(DistanceSquared(value1, value2));
+        }
+
+        /// <summary>
+        /// Returns the distance between two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <param name="result">The distance between two vectors as an output parameter.</param>
+        public static void Distance(ref Vector4 value1, ref Vector4 value2, out float result)
+        {
+            result = (float)Math.Sqrt(DistanceSquared(value1, value2));
+        }
+
+        /// <summary>
+        /// Returns the squared distance between two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <returns>The squared distance between two vectors.</returns>
+        public static float DistanceSquared(Vector4 value1, Vector4 value2)
+        {
+              return (value1.W - value2.W) * (value1.W - value2.W) +
+                     (value1.X - value2.X) * (value1.X - value2.X) +
+                     (value1.Y - value2.Y) * (value1.Y - value2.Y) +
+                     (value1.Z - value2.Z) * (value1.Z - value2.Z);
+        }
+
+        /// <summary>
+        /// Returns the squared distance between two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <param name="result">The squared distance between two vectors as an output parameter.</param>
+        public static void DistanceSquared(ref Vector4 value1, ref Vector4 value2, out float result)
+        {
+            result = (value1.W - value2.W) * (value1.W - value2.W) +
+                     (value1.X - value2.X) * (value1.X - value2.X) +
+                     (value1.Y - value2.Y) * (value1.Y - value2.Y) +
+                     (value1.Z - value2.Z) * (value1.Z - value2.Z);
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Divisor <see cref="Vector4"/>.</param>
+        /// <returns>The result of dividing the vectors.</returns>
+        public static Vector4 Divide(Vector4 value1, Vector4 value2)
+        {
+            value1.W /= value2.W;
+            value1.X /= value2.X;
+            value1.Y /= value2.Y;
+            value1.Z /= value2.Z;
+            return value1;
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by a scalar.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="divider">Divisor scalar.</param>
+        /// <returns>The result of dividing a vector by a scalar.</returns>
+        public static Vector4 Divide(Vector4 value1, float divider)
+        {
+            float factor = 1f / divider;
+            value1.W *= factor;
+            value1.X *= factor;
+            value1.Y *= factor;
+            value1.Z *= factor;
+            return value1;
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by a scalar.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="divider">Divisor scalar.</param>
+        /// <param name="result">The result of dividing a vector by a scalar as an output parameter.</param>
+        public static void Divide(ref Vector4 value1, float divider, out Vector4 result)
+        {
+            float factor = 1f / divider;
+            result.W = value1.W * factor;
+            result.X = value1.X * factor;
+            result.Y = value1.Y * factor;
+            result.Z = value1.Z * factor;
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Divisor <see cref="Vector4"/>.</param>
+        /// <param name="result">The result of dividing the vectors as an output parameter.</param>
+        public static void Divide(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result.W = value1.W / value2.W;
+            result.X = value1.X / value2.X;
+            result.Y = value1.Y / value2.Y;
+            result.Z = value1.Z / value2.Z;
+        }
+
+        /// <summary>
+        /// Returns a dot product of two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <returns>The dot product of two vectors.</returns>
+        public static float Dot(Vector4 value1, Vector4 value2)
+        {
+            return value1.X * value2.X + value1.Y * value2.Y + value1.Z * value2.Z + value1.W * value2.W;
+        }
+
+        /// <summary>
+        /// Returns a dot product of two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <param name="result">The dot product of two vectors as an output parameter.</param>
+        public static void Dot(ref Vector4 value1, ref Vector4 value2, out float result)
+        {
+            result = value1.X * value2.X + value1.Y * value2.Y + value1.Z * value2.Z + value1.W * value2.W;
+        }
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified <see cref="Object"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="Object"/> to compare.</param>
+        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            return (obj is Vector4) ? this == (Vector4)obj : false;
+        }
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="other">The <see cref="Vector4"/> to compare.</param>
+        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        public bool Equals(Vector4 other)
+        {
+            return this.W == other.W
+                && this.X == other.X
+                && this.Y == other.Y
+                && this.Z == other.Z;
+        }
+
+        /// <summary>
+        /// Gets the hash code of this <see cref="Vector4"/>.
+        /// </summary>
+        /// <returns>Hash code of this <see cref="Vector4"/>.</returns>
+        public override int GetHashCode()
+        {
+            return (int)(this.W + this.X + this.Y + this.Y);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains hermite spline interpolation.
+        /// </summary>
+        /// <param name="value1">The first position vector.</param>
+        /// <param name="tangent1">The first tangent vector.</param>
+        /// <param name="value2">The second position vector.</param>
+        /// <param name="tangent2">The second tangent vector.</param>
+        /// <param name="amount">Weighting factor.</param>
+        /// <returns>The hermite spline interpolation vector.</returns>
+        public static Vector4 Hermite(Vector4 value1, Vector4 tangent1, Vector4 value2, Vector4 tangent2, float amount)
+        {
+            return new Vector4(MathHelper.Hermite(value1.X, tangent1.X, value2.X, tangent2.X, amount),
+                               MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount),
+                               MathHelper.Hermite(value1.Z, tangent1.Z, value2.Z, tangent2.Z, amount),
+                               MathHelper.Hermite(value1.W, tangent1.W, value2.W, tangent2.W, amount));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains hermite spline interpolation.
+        /// </summary>
+        /// <param name="value1">The first position vector.</param>
+        /// <param name="tangent1">The first tangent vector.</param>
+        /// <param name="value2">The second position vector.</param>
+        /// <param name="tangent2">The second tangent vector.</param>
+        /// <param name="amount">Weighting factor.</param>
+        /// <param name="result">The hermite spline interpolation vector as an output parameter.</param>
+        public static void Hermite(ref Vector4 value1, ref Vector4 tangent1, ref Vector4 value2, ref Vector4 tangent2, float amount, out Vector4 result)
+        {
+            result.W = MathHelper.Hermite(value1.W, tangent1.W, value2.W, tangent2.W, amount);
+            result.X = MathHelper.Hermite(value1.X, tangent1.X, value2.X, tangent2.X, amount);
+            result.Y = MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount);
+            result.Z = MathHelper.Hermite(value1.Z, tangent1.Z, value2.Z, tangent2.Z, amount);
+        }
+
+        /// <summary>
+        /// Returns the length of this <see cref="Vector4"/>.
+        /// </summary>
+        /// <returns>The length of this <see cref="Vector4"/>.</returns>
+        public float Length()
+        {
+            float result = DistanceSquared(this, zero);
+            return (float)Math.Sqrt(result);
+        }
+
+        /// <summary>
+        /// Returns the squared length of this <see cref="Vector4"/>.
+        /// </summary>
+        /// <returns>The squared length of this <see cref="Vector4"/>.</returns>
+        public float LengthSquared()
+        {
+            return DistanceSquared(this, zero);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
+        /// <returns>The result of linear interpolation of the specified vectors.</returns>
+        public static Vector4 Lerp(Vector4 value1, Vector4 value2, float amount)
+        {
+            return new Vector4(
+                MathHelper.Lerp(value1.X, value2.X, amount),
+                MathHelper.Lerp(value1.Y, value2.Y, amount),
+                MathHelper.Lerp(value1.Z, value2.Z, amount),
+                MathHelper.Lerp(value1.W, value2.W, amount));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
+        /// <param name="result">The result of linear interpolation of the specified vectors as an output parameter.</param>
+        public static void Lerp(ref Vector4 value1, ref Vector4 value2, float amount, out Vector4 result)
+        {
+            result.X = MathHelper.Lerp(value1.X, value2.X, amount);
+            result.Y = MathHelper.Lerp(value1.Y, value2.Y, amount);
+            result.Z = MathHelper.Lerp(value1.Z, value2.Z, amount);
+            result.W = MathHelper.Lerp(value1.W, value2.W, amount);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a maximal values from the two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <returns>The <see cref="Vector4"/> with maximal values from the two vectors.</returns>
+        public static Vector4 Max(Vector4 value1, Vector4 value2)
+        {
+            return new Vector4(
+               MathHelper.Max(value1.X, value2.X),
+               MathHelper.Max(value1.Y, value2.Y),
+               MathHelper.Max(value1.Z, value2.Z),
+               MathHelper.Max(value1.W, value2.W));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a maximal values from the two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <param name="result">The <see cref="Vector4"/> with maximal values from the two vectors as an output parameter.</param>
+        public static void Max(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result.X = MathHelper.Max(value1.X, value2.X);
+            result.Y = MathHelper.Max(value1.Y, value2.Y);
+            result.Z = MathHelper.Max(value1.Z, value2.Z);
+            result.W = MathHelper.Max(value1.W, value2.W);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a minimal values from the two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <returns>The <see cref="Vector4"/> with minimal values from the two vectors.</returns>
+        public static Vector4 Min(Vector4 value1, Vector4 value2)
+        {
+            return new Vector4(
+               MathHelper.Min(value1.X, value2.X),
+               MathHelper.Min(value1.Y, value2.Y),
+               MathHelper.Min(value1.Z, value2.Z),
+               MathHelper.Min(value1.W, value2.W));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a minimal values from the two vectors.
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <param name="result">The <see cref="Vector4"/> with minimal values from the two vectors as an output parameter.</param>
+        public static void Min(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result.X = MathHelper.Min(value1.X, value2.X);
+            result.Y = MathHelper.Min(value1.Y, value2.Y);
+            result.Z = MathHelper.Min(value1.Z, value2.Z);
+            result.W = MathHelper.Min(value1.W, value2.W);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a multiplication of two vectors.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Source <see cref="Vector4"/>.</param>
+        /// <returns>The result of the vector multiplication.</returns>
+        public static Vector4 Multiply(Vector4 value1, Vector4 value2)
+        {
+            value1.W *= value2.W;
+            value1.X *= value2.X;
+            value1.Y *= value2.Y;
+            value1.Z *= value2.Z;
+            return value1;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a multiplication of <see cref="Vector4"/> and a scalar.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="scaleFactor">Scalar value.</param>
+        /// <returns>The result of the vector multiplication with a scalar.</returns>
+        public static Vector4 Multiply(Vector4 value1, float scaleFactor)
+        {
+            value1.W *= scaleFactor;
+            value1.X *= scaleFactor;
+            value1.Y *= scaleFactor;
+            value1.Z *= scaleFactor;
+            return value1;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a multiplication of <see cref="Vector4"/> and a scalar.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="scaleFactor">Scalar value.</param>
+        /// <param name="result">The result of the multiplication with a scalar as an output parameter.</param>
+        public static void Multiply(ref Vector4 value1, float scaleFactor, out Vector4 result)
+        {
+            result.W = value1.W * scaleFactor;
+            result.X = value1.X * scaleFactor;
+            result.Y = value1.Y * scaleFactor;
+            result.Z = value1.Z * scaleFactor;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a multiplication of two vectors.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Source <see cref="Vector4"/>.</param>
+        /// <param name="result">The result of the vector multiplication as an output parameter.</param>
+        public static void Multiply(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result.W = value1.W * value2.W;
+            result.X = value1.X * value2.X;
+            result.Y = value1.Y * value2.Y;
+            result.Z = value1.Z * value2.Z;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains the specified vector inversion.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <returns>The result of the vector inversion.</returns>
+        public static Vector4 Negate(Vector4 value)
+        {
+            value = new Vector4(-value.X, -value.Y, -value.Z, -value.W);
+            return value;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains the specified vector inversion.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="result">The result of the vector inversion as an output parameter.</param>
+        public static void Negate(ref Vector4 value, out Vector4 result)
+        {
+            result.X = -value.X;
+            result.Y = -value.Y;
+            result.Z = -value.Z;
+            result.W = -value.W;
+        }
+
+        /// <summary>
+        /// Turns this <see cref="Vector4"/> to a unit vector with the same direction.
+        /// </summary>
+        public void Normalize()
+        {
+            Normalize(ref this, out this);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a normalized values from another vector.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <returns>Unit vector.</returns>
+        public static Vector4 Normalize(Vector4 value)
+        {
+            float factor = DistanceSquared(value, zero);
+            factor = 1f / (float)Math.Sqrt(factor);
+
+            return new Vector4(value.X*factor,value.Y*factor,value.Z*factor,value.W*factor);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a normalized values from another vector.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="result">Unit vector as an output parameter.</param>
+        public static void Normalize(ref Vector4 value, out Vector4 result)
+        {
+            float factor = DistanceSquared(value, zero);
+            factor = 1f / (float)Math.Sqrt(factor);
+
+            result.W = value.W * factor;
+            result.X = value.X * factor;
+            result.Y = value.Y * factor;
+            result.Z = value.Z * factor;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains cubic interpolation of the specified vectors.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Source <see cref="Vector4"/>.</param>
+        /// <param name="amount">Weighting value.</param>
+        /// <returns>Cubic interpolation of the specified vectors.</returns>
+        public static Vector4 SmoothStep(Vector4 value1, Vector4 value2, float amount)
+        {
+            return new Vector4(
+                MathHelper.SmoothStep(value1.X, value2.X, amount),
+                MathHelper.SmoothStep(value1.Y, value2.Y, amount),
+                MathHelper.SmoothStep(value1.Z, value2.Z, amount),
+                MathHelper.SmoothStep(value1.W, value2.W, amount));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains cubic interpolation of the specified vectors.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Source <see cref="Vector4"/>.</param>
+        /// <param name="amount">Weighting value.</param>
+        /// <param name="result">Cubic interpolation of the specified vectors as an output parameter.</param>
+        public static void SmoothStep(ref Vector4 value1, ref Vector4 value2, float amount, out Vector4 result)
+        {
+            result.X = MathHelper.SmoothStep(value1.X, value2.X, amount);
+            result.Y = MathHelper.SmoothStep(value1.Y, value2.Y, amount);
+            result.Z = MathHelper.SmoothStep(value1.Z, value2.Z, amount);
+            result.W = MathHelper.SmoothStep(value1.W, value2.W, amount);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains subtraction of on <see cref="Vector4"/> from a another.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Source <see cref="Vector4"/>.</param>
+        /// <returns>The result of the vector subtraction.</returns>
+        public static Vector4 Subtract(Vector4 value1, Vector4 value2)
+        {
+            value1.W -= value2.W;
+            value1.X -= value2.X;
+            value1.Y -= value2.Y;
+            value1.Z -= value2.Z;
+            return value1;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains subtraction of on <see cref="Vector4"/> from a another.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/>.</param>
+        /// <param name="value2">Source <see cref="Vector4"/>.</param>
+        /// <param name="result">The result of the vector subtraction as an output parameter.</param>
+        public static void Subtract(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result.W = value1.W - value2.W;
+            result.X = value1.X - value2.X;
+            result.Y = value1.Y - value2.Y;
+            result.Z = value1.Z - value2.Z;
+        }
+
+        #region Transform
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <returns>Transformed <see cref="Vector4"/>.</returns>
+        public static Vector4 Transform(Vector2 value, Matrix matrix)
+        {
+            Vector4 result;
+            Transform(ref value, ref matrix, out result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2d-vector by the specified <see cref="Quaternion"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <returns>Transformed <see cref="Vector4"/>.</returns>
+        public static Vector4 Transform(Vector2 value, Quaternion rotation)
+        {
+            Vector4 result;
+            Transform(ref value, ref rotation, out result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector3"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <returns>Transformed <see cref="Vector4"/>.</returns>
+        public static Vector4 Transform(Vector3 value, Matrix matrix)
+        {
+            Vector4 result;
+            Transform(ref value, ref matrix, out result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3d-vector by the specified <see cref="Quaternion"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector3"/>.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <returns>Transformed <see cref="Vector4"/>.</returns>
+        public static Vector4 Transform(Vector3 value, Quaternion rotation)
+        {
+            Vector4 result;
+            Transform(ref value, ref rotation, out result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4d-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <returns>Transformed <see cref="Vector4"/>.</returns>
+        public static Vector4 Transform(Vector4 value, Matrix matrix)
+        {
+            Transform(ref value, ref matrix, out value);
+            return value;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4d-vector by the specified <see cref="Quaternion"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <returns>Transformed <see cref="Vector4"/>.</returns>
+        public static Vector4 Transform(Vector4 value, Quaternion rotation)
+        {
+            Vector4 result;
+            Transform(ref value, ref rotation, out result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/> as an output parameter.</param>
+        public static void Transform(ref Vector2 value, ref Matrix matrix, out Vector4 result)
+        {
+            result.X = (value.X * matrix.M11) + (value.Y * matrix.M21) + matrix.M41;
+            result.Y = (value.X * matrix.M12) + (value.Y * matrix.M22) + matrix.M42;
+            result.Z = (value.X * matrix.M13) + (value.Y * matrix.M23) + matrix.M43;
+            result.W = (value.X * matrix.M14) + (value.Y * matrix.M24) + matrix.M44;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2d-vector by the specified <see cref="Quaternion"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/> as an output parameter.</param>
+        public static void Transform(ref Vector2 value, ref Quaternion rotation, out Vector4 result)
+        {
+            double xx = rotation.X + rotation.X;
+            double yy = rotation.Y + rotation.Y;
+            double zz = rotation.Z + rotation.Z;
+            double wxx = rotation.W * xx;
+            double wyy = rotation.W * yy;
+            double wzz = rotation.W * zz;
+            double xxx = rotation.X * xx;
+            double xyy = rotation.X * yy;
+            double xzz = rotation.X * zz;
+            double yyy = rotation.Y * yy;
+            double yzz = rotation.Y * zz;
+            double zzz = rotation.Z * zz;
+            result.X = (float)((double)value.X * (1.0 - yyy - zzz) + (double)value.Y * (xyy - wzz));
+            result.Y = (float)((double)value.X * (xyy + wzz) + (double)value.Y * (1.0 - xxx - zzz));
+            result.Z = (float)((double)value.X * (xzz - wyy) + (double)value.Y * (yzz + wxx));
+            result.W = 1f;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector3"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/> as an output parameter.</param>
+        public static void Transform(ref Vector3 value, ref Matrix matrix, out Vector4 result)
+        {
+            result.X = (value.X * matrix.M11) + (value.Y * matrix.M21) + (value.Z * matrix.M31) + matrix.M41;
+            result.Y = (value.X * matrix.M12) + (value.Y * matrix.M22) + (value.Z * matrix.M32) + matrix.M42;
+            result.Z = (value.X * matrix.M13) + (value.Y * matrix.M23) + (value.Z * matrix.M33) + matrix.M43;
+            result.W = (value.X * matrix.M14) + (value.Y * matrix.M24) + (value.Z * matrix.M34) + matrix.M44;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3d-vector by the specified <see cref="Quaternion"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector3"/>.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/> as an output parameter.</param>
+        public static void Transform(ref Vector3 value, ref Quaternion rotation, out Vector4 result)
+        {
+            double xx = rotation.X + rotation.X;
+            double yy = rotation.Y + rotation.Y;
+            double zz = rotation.Z + rotation.Z;
+            double wxx = rotation.W * xx;
+            double wyy = rotation.W * yy;
+            double wzz = rotation.W * zz;
+            double xxx = rotation.X * xx;
+            double xyy = rotation.X * yy;
+            double xzz = rotation.X * zz;
+            double yyy = rotation.Y * yy;
+            double yzz = rotation.Y * zz;
+            double zzz = rotation.Z * zz;
+            result.X = (float)((double)value.X * (1.0 - yyy - zzz) + (double)value.Y * (xyy - wzz) + (double)value.Z * (xzz + wyy));
+            result.Y = (float)((double)value.X * (xyy + wzz) + (double)value.Y * (1.0 - xxx - zzz) + (double)value.Z * (yzz - wxx));
+            result.Z = (float)((double)value.X * (xzz - wyy) + (double)value.Y * (yzz + wxx) + (double)value.Z * (1.0 - xxx - yyy));
+            result.W = 1f;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4d-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/> as an output parameter.</param>
+        public static void Transform(ref Vector4 value, ref Matrix matrix, out Vector4 result)
+        {
+            var x = (value.X * matrix.M11) + (value.Y * matrix.M21) + (value.Z * matrix.M31) + (value.W * matrix.M41);
+            var y = (value.X * matrix.M12) + (value.Y * matrix.M22) + (value.Z * matrix.M32) + (value.W * matrix.M42);
+            var z = (value.X * matrix.M13) + (value.Y * matrix.M23) + (value.Z * matrix.M33) + (value.W * matrix.M43);
+            var w = (value.X * matrix.M14) + (value.Y * matrix.M24) + (value.Z * matrix.M34) + (value.W * matrix.M44);
+            result.X = x;
+            result.Y = y;
+            result.Z = z;
+            result.W = w;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4d-vector by the specified <see cref="Quaternion"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/> as an output parameter.</param>
+        public static void Transform(ref Vector4 value, ref Quaternion rotation, out Vector4 result)
+        {
+            double xx = rotation.X + rotation.X;
+            double yy = rotation.Y + rotation.Y;
+            double zz = rotation.Z + rotation.Z;
+            double wxx = rotation.W * xx;
+            double wyy = rotation.W * yy;
+            double wzz = rotation.W * zz;
+            double xxx = rotation.X * xx;
+            double xyy = rotation.X * yy;
+            double xzz = rotation.X * zz;
+            double yyy = rotation.Y * yy;
+            double yzz = rotation.Y * zz;
+            double zzz = rotation.Z * zz;
+            result.X = (float)((double)value.X * (1.0 - yyy - zzz) + (double)value.Y * (xyy - wzz) + (double)value.Z * (xzz + wyy));
+            result.Y = (float)((double)value.X * (xyy + wzz) + (double)value.Y * (1.0 - xxx - zzz) + (double)value.Z * (yzz - wxx));
+            result.Z = (float)((double)value.X * (xzz - wyy) + (double)value.Y * (yzz + wxx) + (double)value.Z * (1.0 - xxx - yyy));
+            result.W = value.W;
+        }
+
+        /// <summary>
+        /// Apply transformation on vectors within array of <see cref="Vector4"/> by the specified <see cref="Matrix"/> and places the results in an another array.
+        /// </summary>
+        /// <param name="sourceArray">Source array.</param>
+        /// <param name="sourceIndex">The starting index of transformation in the source array.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="destinationArray">Destination array.</param>
+        /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector4"/> should be written.</param>
+        /// <param name="length">The number of vectors to be transformed.</param>
+        public static void Transform
+        (
+            Vector4[] sourceArray,
+            int sourceIndex,
+            ref Matrix matrix,
+            Vector4[] destinationArray,
+            int destinationIndex,
+            int length
+        )
+        {
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (sourceArray.Length < sourceIndex + length)
+                throw new ArgumentException("Source array length is lesser than sourceIndex + length");
+            if (destinationArray.Length < destinationIndex + length)
+                throw new ArgumentException("Destination array length is lesser than destinationIndex + length");
+
+            for (var i = 0; i < length; i++)
+            {
+                var value = sourceArray[sourceIndex + i];
+                destinationArray[destinationIndex + i] = Transform(value, matrix);
+            }
+        }
+
+        /// <summary>
+        /// Apply transformation on vectors within array of <see cref="Vector4"/> by the specified <see cref="Quaternion"/> and places the results in an another array.
+        /// </summary>
+        /// <param name="sourceArray">Source array.</param>
+        /// <param name="sourceIndex">The starting index of transformation in the source array.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <param name="destinationArray">Destination array.</param>
+        /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector4"/> should be written.</param>
+        /// <param name="length">The number of vectors to be transformed.</param>
+        public static void Transform(
+            Vector4[] sourceArray,
+            int sourceIndex,
+            ref Quaternion rotation,
+            Vector4[] destinationArray,
+            int destinationIndex,
+            int length
+            )
+        {
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (sourceArray.Length < sourceIndex + length)
+                throw new ArgumentException("Source array length is lesser than sourceIndex + length");
+            if (destinationArray.Length < destinationIndex + length)
+                throw new ArgumentException("Destination array length is lesser than destinationIndex + length");
+
+            for (var i = 0; i < length; i++)
+            {
+                var value = sourceArray[sourceIndex + i];
+                destinationArray[destinationIndex + i] = Transform(value, rotation);
+            }
+        }
+
+        /// <summary>
+        /// Apply transformation on all vectors within array of <see cref="Vector4"/> by the specified <see cref="Matrix"/> and places the results in an another array.
+        /// </summary>
+        /// <param name="sourceArray">Source array.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="destinationArray">Destination array.</param>
+        public static void Transform(Vector4[] sourceArray, ref Matrix matrix, Vector4[] destinationArray)
+        {
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (destinationArray.Length < sourceArray.Length)
+                throw new ArgumentException("Destination array length is lesser than source array length");
+
+            for (var i = 0; i < sourceArray.Length; i++)
+            {
+                var value = sourceArray[i];
+                destinationArray[i] = Transform(value, matrix);
+            }
+        }
+
+        /// <summary>
+        /// Apply transformation on all vectors within array of <see cref="Vector4"/> by the specified <see cref="Quaternion"/> and places the results in an another array.
+        /// </summary>
+        /// <param name="sourceArray">Source array.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <param name="destinationArray">Destination array.</param>
+        public static void Transform(Vector4[] sourceArray, ref Quaternion rotation, Vector4[] destinationArray)
+        {
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (destinationArray.Length < sourceArray.Length)
+                throw new ArgumentException("Destination array length is lesser than source array length");
+
+            for (var i = 0; i < sourceArray.Length; i++)
+            {
+                var value = sourceArray[i];
+                destinationArray[i] = Transform(value, rotation);
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Returns a <see cref="String"/> representation of this <see cref="Vector4"/> in the format:
+        /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Z:[<see cref="Z"/>] W:[<see cref="W"/>]}
+        /// </summary>
+        /// <returns>A <see cref="String"/> representation of this <see cref="Vector4"/>.</returns>
+        public override string ToString()
+        {
+            return "{X:" + X + " Y:" + Y + " Z:" + Z + " W:" + W + "}";
+        }
+
+        #endregion
+
+        #region Operators
+
+        /// <summary>
+        /// Inverts values in the specified <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/> on the right of the sub sign.</param>
+        /// <returns>Result of the inversion.</returns>
+        public static Vector4 operator -(Vector4 value)
+        {
+            return new Vector4(-value.X, -value.Y, -value.Z, -value.W);
+        }
+
+        /// <summary>
+        /// Compares whether two <see cref="Vector4"/> instances are equal.
+        /// </summary>
+        /// <param name="value1"><see cref="Vector4"/> instance on the left of the equal sign.</param>
+        /// <param name="value2"><see cref="Vector4"/> instance on the right of the equal sign.</param>
+        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        public static bool operator ==(Vector4 value1, Vector4 value2)
+        {
+            return value1.W == value2.W
+                && value1.X == value2.X
+                && value1.Y == value2.Y
+                && value1.Z == value2.Z;
+        }
+
+        /// <summary>
+        /// Compares whether two <see cref="Vector4"/> instances are not equal.
+        /// </summary>
+        /// <param name="value1"><see cref="Vector4"/> instance on the left of the not equal sign.</param>
+        /// <param name="value2"><see cref="Vector4"/> instance on the right of the not equal sign.</param>
+        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
+        public static bool operator !=(Vector4 value1, Vector4 value2)
+        {
+            return !(value1 == value2);
+        }
+
+        /// <summary>
+        /// Adds two vectors.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/> on the left of the add sign.</param>
+        /// <param name="value2">Source <see cref="Vector4"/> on the right of the add sign.</param>
+        /// <returns>Sum of the vectors.</returns>
+        public static Vector4 operator +(Vector4 value1, Vector4 value2)
+        {
+            value1.W += value2.W;
+            value1.X += value2.X;
+            value1.Y += value2.Y;
+            value1.Z += value2.Z;
+            return value1;
+        }
+
+        /// <summary>
+        /// Subtracts a <see cref="Vector4"/> from a <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/> on the left of the sub sign.</param>
+        /// <param name="value2">Source <see cref="Vector4"/> on the right of the sub sign.</param>
+        /// <returns>Result of the vector subtraction.</returns>
+        public static Vector4 operator -(Vector4 value1, Vector4 value2)
+        {
+            value1.W -= value2.W;
+            value1.X -= value2.X;
+            value1.Y -= value2.Y;
+            value1.Z -= value2.Z;
+            return value1;
+        }
+
+        /// <summary>
+        /// Multiplies the components of two vectors by each other.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/> on the left of the mul sign.</param>
+        /// <param name="value2">Source <see cref="Vector4"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication.</returns>
+        public static Vector4 operator *(Vector4 value1, Vector4 value2)
+        {
+            value1.W *= value2.W;
+            value1.X *= value2.X;
+            value1.Y *= value2.Y;
+            value1.Z *= value2.Z;
+            return value1;
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/> on the left of the mul sign.</param>
+        /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector4 operator *(Vector4 value, float scaleFactor)
+        {
+            value.W *= scaleFactor;
+            value.X *= scaleFactor;
+            value.Y *= scaleFactor;
+            value.Z *= scaleFactor;
+            return value;
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
+        /// <param name="value">Source <see cref="Vector4"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector4 operator *(float scaleFactor, Vector4 value)
+        {
+            value.W *= scaleFactor;
+            value.X *= scaleFactor;
+            value.Y *= scaleFactor;
+            value.Z *= scaleFactor;
+            return value;
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/> on the left of the div sign.</param>
+        /// <param name="value2">Divisor <see cref="Vector4"/> on the right of the div sign.</param>
+        /// <returns>The result of dividing the vectors.</returns>
+        public static Vector4 operator /(Vector4 value1, Vector4 value2)
+        {
+            value1.W /= value2.W;
+            value1.X /= value2.X;
+            value1.Y /= value2.Y;
+            value1.Z /= value2.Z;
+            return value1;
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by a scalar.
+        /// </summary>
+        /// <param name="value1">Source <see cref="Vector4"/> on the left of the div sign.</param>
+        /// <param name="divider">Divisor scalar on the right of the div sign.</param>
+        /// <returns>The result of dividing a vector by a scalar.</returns>
+        public static Vector4 operator /(Vector4 value1, float divider)
+        {
+            float factor = 1f / divider;
+            value1.W *= factor;
+            value1.X *= factor;
+            value1.Y *= factor;
+            value1.Z *= factor;
+            return value1;
+        }
+
+        #endregion
+    }
+}
