@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 
 namespace Mono.GameMath.Tests
 {
@@ -81,11 +82,9 @@ namespace Mono.GameMath.Tests
             [Test]
             public void CorrectRotationLookingAtArbitraryDirection()
             {
-                var forward = new Vector3(1, 0, 0);
+                var forwardRightLook = Quaternion.LookAt((Vector3.Right + Vector3.Forward).Normalized());
 
-                var lookAt = Quaternion.LookAt(forward);
-
-                Compare(lookAt, new Quaternion(0, -0.7071068f, 0, 0.7071068f));
+                Compare(forwardRightLook, new Quaternion(0, -0.3826835f, 0, 0.9238796f));
             }
 
             [Test]
@@ -97,9 +96,9 @@ namespace Mono.GameMath.Tests
             }
 
             [Test]
-            public void Rotated180WhenForwardIsOppositeOfUnitForward()
+            public void Rotated180WhenForwardIsUnitBackward()
             {
-                var lookAt = Quaternion.LookAt(-Vector3.Forward);
+                var lookAt = Quaternion.LookAt(Vector3.Backward);
 
                 Compare(lookAt, new Quaternion(0, 1, 0, MathHelper.Pi));
             }
