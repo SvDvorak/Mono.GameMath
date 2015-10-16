@@ -1,6 +1,8 @@
 Fast Managed Math for Games
 ===========================
 
+NOTE: This fork has merged in newer code from the Mono.Game framework, I've also changed it from being right-handed to left-handed.
+
 Mono.GameMath is a project to develop a highly-performant math library
 for games.
 
