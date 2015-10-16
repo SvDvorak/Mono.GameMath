@@ -260,20 +260,22 @@ namespace Mono.GameMath
 
         public static Quaternion LookAt(Vector3 forward)
         {
-            forward = new Vector3(-forward.X, forward.Y, forward.Z);
+            forward = forward.Normalized();
             float dot = Vector3.Dot(Vector3.Forward, forward);
 
             if (Math.Abs(dot - (-1.0f)) < 0.000001f)
             {
-                return new Quaternion(Vector3.Up, MathHelper.Pi);
+                return new Quaternion(Vector3.Up, 0);
             }
             if (Math.Abs(dot - (1.0f)) < 0.000001f)
             {
                 return Identity;
             }
 
-            return CreateFromRotationMatrix(
-                Matrix.CreateLookAt(Vector3.Zero, forward.Normalized(), Vector3.Up));
+            var rotAngle = (float)Math.Acos(dot);
+            var rotAxis = Vector3.Cross(Vector3.Forward, forward);
+            rotAxis = Vector3.Normalize(rotAxis);
+            return CreateFromAxisAngle(rotAxis, rotAngle);
         }
 
         #endregion

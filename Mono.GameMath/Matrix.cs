@@ -706,26 +706,26 @@ namespace Mono.GameMath
         /// <param name="result">The rotation <see cref="Matrix"/> as an output parameter.</param>
         public static void CreateFromQuaternion(ref Quaternion quaternion, out Matrix result)
         {
-            float num9 = quaternion.X * quaternion.X;
-		    float num8 = quaternion.Y * quaternion.Y;
-		    float num7 = quaternion.Z * quaternion.Z;
-		    float num6 = quaternion.X * quaternion.Y;
-		    float num5 = quaternion.Z * quaternion.W;
-		    float num4 = quaternion.Z * quaternion.X;
-		    float num3 = quaternion.Y * quaternion.W;
-		    float num2 = quaternion.Y * quaternion.Z;
-		    float num = quaternion.X * quaternion.W;
-		    result.M11 = 1f - (2f * (num8 + num7));
-		    result.M12 = 2f * (num6 + num5);
-		    result.M13 = 2f * (num4 - num3);
+            float xx = quaternion.X * quaternion.X;
+		    float yy = quaternion.Y * quaternion.Y;
+		    float zz = quaternion.Z * quaternion.Z;
+		    float xy = quaternion.X * quaternion.Y;
+		    float zw = quaternion.Z * quaternion.W;
+		    float zx = quaternion.Z * quaternion.X;
+		    float yw = quaternion.Y * quaternion.W;
+		    float yz = quaternion.Y * quaternion.Z;
+		    float xw = quaternion.X * quaternion.W;
+		    result.M11 = 1f - (2f * (yy + zz));
+		    result.M12 = 2f * (xy + zw);
+		    result.M13 = 2f * (zx - yw);
 		    result.M14 = 0f;
-		    result.M21 = 2f * (num6 - num5);
-		    result.M22 = 1f - (2f * (num7 + num9));
-		    result.M23 = 2f * (num2 + num);
+		    result.M21 = 2f * (xy - zw);
+		    result.M22 = 1f - (2f * (zz + xx));
+		    result.M23 = 2f * (yz + xw);
 		    result.M24 = 0f;
-		    result.M31 = 2f * (num4 + num3);
-		    result.M32 = 2f * (num2 - num);
-		    result.M33 = 1f - (2f * (num8 + num9));
+		    result.M31 = 2f * (zx + yw);
+		    result.M32 = 2f * (yz - xw);
+		    result.M33 = 1f - (2f * (yy + xx));
 		    result.M34 = 0f;
 		    result.M41 = 0f;
 		    result.M42 = 0f;
@@ -788,24 +788,24 @@ namespace Mono.GameMath
         /// <param name="result">The viewing <see cref="Matrix"/> as an output parameter.</param>
         public static void CreateLookAt(ref Vector3 cameraPosition, ref Vector3 cameraTarget, ref Vector3 cameraUpVector, out Matrix result)
         {
-            var vector = Vector3.Normalize(cameraPosition - cameraTarget);
-            var vector2 = Vector3.Normalize(Vector3.Cross(cameraUpVector, vector));
-            var vector3 = Vector3.Cross(vector, vector2);
-		    result.M11 = vector2.X;
-		    result.M12 = vector3.X;
-		    result.M13 = vector.X;
+            var zaxis = Vector3.Normalize(cameraTarget - cameraPosition);
+            var xaxis = Vector3.Normalize(Vector3.Cross(cameraUpVector, zaxis));
+            var yaxis = Vector3.Cross(zaxis, xaxis);
+		    result.M11 = xaxis.X;
+		    result.M12 = yaxis.X;
+		    result.M13 = zaxis.X;
 		    result.M14 = 0f;
-		    result.M21 = vector2.Y;
-		    result.M22 = vector3.Y;
-		    result.M23 = vector.Y;
+		    result.M21 = xaxis.Y;
+		    result.M22 = yaxis.Y;
+		    result.M23 = zaxis.Y;
 		    result.M24 = 0f;
-		    result.M31 = vector2.Z;
-		    result.M32 = vector3.Z;
-		    result.M33 = vector.Z;
+		    result.M31 = xaxis.Z;
+		    result.M32 = yaxis.Z;
+		    result.M33 = zaxis.Z;
 		    result.M34 = 0f;
-		    result.M41 = -Vector3.Dot(vector2, cameraPosition);
-		    result.M42 = -Vector3.Dot(vector3, cameraPosition);
-		    result.M43 = -Vector3.Dot(vector, cameraPosition);
+		    result.M41 = -Vector3.Dot(xaxis, cameraPosition);
+		    result.M42 = -Vector3.Dot(yaxis, cameraPosition);
+		    result.M43 = -Vector3.Dot(zaxis, cameraPosition);
 		    result.M44 = 1f;
         }
 

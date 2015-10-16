@@ -10,6 +10,11 @@ namespace Mono.GameMath.Tests
             Assert.That(expected, Is.EqualTo(source).Using(QuaternionComparer.Epsilon));
         }
 
+        private static void Compare(Vector3 expected, Vector3 source)
+        {
+            Assert.That(expected, Is.EqualTo(source).Using(Vector3Comparer.Epsilon));
+        }
+
         private static void Compare(float expected, float source)
         {
             Assert.That(expected, Is.EqualTo(source).Using(FloatComparer.Epsilon));
@@ -82,9 +87,19 @@ namespace Mono.GameMath.Tests
             [Test]
             public void CorrectRotationLookingAtArbitraryDirection()
             {
-                var forwardRightLook = Quaternion.LookAt((Vector3.Right + Vector3.Forward).Normalized());
+                ShouldLookAt(Vector3.Forward);
+                ShouldLookAt(Vector3.Backward);
+                ShouldLookAt(Vector3.Left);
+                ShouldLookAt(Vector3.Right);
+                ShouldLookAt(Vector3.Forward + Vector3.Right);
+                ShouldLookAt(new Vector3(0.3f, 0.6f, 0.1f));
+            }
 
-                Compare(forwardRightLook, new Quaternion(0, -0.3826835f, 0, 0.9238796f));
+            private static void ShouldLookAt(Vector3 direction)
+            {
+                direction = direction.Normalized();
+                var quaternionLook = Quaternion.LookAt(direction)*Vector3.Forward;
+                Compare(quaternionLook, direction);
             }
 
             [Test]

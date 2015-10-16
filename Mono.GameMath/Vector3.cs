@@ -30,8 +30,8 @@ namespace Mono.GameMath
         private static readonly Vector3 down = new Vector3(0f, -1f, 0f);
         private static readonly Vector3 right = new Vector3(1f, 0f, 0f);
         private static readonly Vector3 left = new Vector3(-1f, 0f, 0f);
-        private static readonly Vector3 forward = new Vector3(0f, 0f, -1f);
-        private static readonly Vector3 backward = new Vector3(0f, 0f, 1f);
+        private static readonly Vector3 forward = new Vector3(0f, 0f, 1f);
+        private static readonly Vector3 backward = new Vector3(0f, 0f, -1f);
 
         #endregion
 
@@ -132,7 +132,7 @@ namespace Mono.GameMath
         }
 
         /// <summary>
-        /// Returns a <see cref="Vector3"/> with components 0, 0, -1.
+        /// Returns a <see cref="Vector3"/> with components 0, 0, 1.
         /// </summary>
         public static Vector3 Forward
         {
@@ -140,7 +140,7 @@ namespace Mono.GameMath
         }
 
         /// <summary>
-        /// Returns a <see cref="Vector3"/> with components 0, 0, 1.
+        /// Returns a <see cref="Vector3"/> with components 0, 0, -1.
         /// </summary>
         public static Vector3 Backward
         {
